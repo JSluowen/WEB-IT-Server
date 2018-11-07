@@ -61,17 +61,48 @@ class Userctrl {
     }
 
     // 后台用户数据查询加载
-    static async userLoading(ctx){
+    static async userLoading(ctx) {
         var token = ctx.request.header.authorization
-        if(token==undefined){
-          ctx.status=400;
-        }else{
-          ctx.status=200;
-          var sql = 'SELECT *FROM USER'
-          var data = await query(sql)
-          ctx.body={
-              data:data
-          }
+        if (token == undefined) {
+            ctx.status = 400;
+        } else {
+            ctx.status = 200;
+            var sql = 'SELECT *FROM USER'
+            var data = await query(sql)
+            ctx.body = {
+                data: data
+            }
+        }
+    }
+
+    //删除用户数据
+    static async userDelete(ctx) {
+        var token = ctx.request.header.authorization
+        var values = ctx.request.query;
+        if (token == undefined) {
+            ctx.status = 400;
+        } else {
+            ctx.status = 200;
+            try {
+                var sql = 'DELETE FROM USER WHERE username= ?'
+                var data = await query(sql, [values.username])
+                if (data.affectedRows) {
+                    ctx.body = {
+                        message: "删除成功"
+                    }
+                } else {
+                    ctx.body = {
+                        message: "删除失败"
+                    }
+                }
+
+            } catch (error) {
+                ctx.status = 400
+            }
+
+
+            // var sql = 'delete from user where username= ?'
+            // var data = await query(sql,)
         }
     }
 }
