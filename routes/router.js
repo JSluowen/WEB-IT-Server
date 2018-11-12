@@ -10,5 +10,6 @@ var router = new Router({
 router.post("/user/login",userctrl.login)
 router.get('/user/userloading',userctrl.userLoading)
 router.get('/user/userdelete',userctrl.userDelete)
+router.get('/user/userpass',userctrl.userPass)
 
 module.exports = router;

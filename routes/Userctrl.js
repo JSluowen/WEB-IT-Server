@@ -59,7 +59,6 @@ class Userctrl {
             ctx.status = 200
         }
     }
-
     // 后台用户数据查询加载
     static async userLoading(ctx) {
         var token = ctx.request.header.authorization
@@ -74,7 +73,6 @@ class Userctrl {
             }
         }
     }
-
     //删除用户数据
     static async userDelete(ctx) {
         var token = ctx.request.header.authorization
@@ -103,6 +101,36 @@ class Userctrl {
 
             // var sql = 'delete from user where username= ?'
             // var data = await query(sql,)
+        }
+    }
+
+    //用户注册通过
+    static async userPass(ctx) {
+        var token = ctx.request.header.authorization
+        var values = ctx.request.query;
+        if (token == undefined) {
+            ctx.status = 400
+        } else {
+            ctx.status = 200
+            try {
+                var sql = "update user set status = 1 where username=?"
+                var data = await query(sql, [values.username])
+                if (data.affectedRows) {
+                    ctx.body = {
+                        message: "审核通过"
+                    }
+                } else {
+                    ctx.body = {
+                        message: "审核未通过"
+                    }
+                }
+            } catch (error) {
+                ctx.status = 400
+                ctx.boy = {
+                    message: "审核出错"
+                }
+            }
+
         }
     }
 }
