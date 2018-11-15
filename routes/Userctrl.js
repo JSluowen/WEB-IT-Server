@@ -11,7 +11,6 @@ class Userctrl {
         try {
             var userInfo = await query(sql, [username]);
             // 判断用户是否存在
-            console.log(userInfo)
             if (userInfo[0].length === 0) {
                 ctx.status = 200
                 ctx.body = {
@@ -103,8 +102,7 @@ class Userctrl {
             // var data = await query(sql,)
         }
     }
-
-    //用户注册通过
+    //用户审核通过
     static async userPass(ctx) {
         var token = ctx.request.header.authorization
         var values = ctx.request.query;
@@ -131,6 +129,41 @@ class Userctrl {
                 }
             }
 
+        }
+    }
+    //用户注册
+    static async userRegister(ctx) {
+        var values = ctx.request.body;
+        try {
+            ctx.status = 200;
+            var sql1 = "SELECT *FROM USER WHERE username= ?"
+            var checkdata = await query(sql1, [values.username])
+            if (checkdata.length > 0) {
+                ctx.body = {
+                    message: "用户已存在,请重新选择用户名",
+                    have: 1
+                }
+            } else {
+                try {
+                    var sql2 = "INSERT INTO USER (username,PASSWORD,email ) VALUES(?,?,?)"
+                    var pass = comm.md5(values.password)
+                    await query(sql2, [values.username, pass, values.email])
+                    ctx.body={
+                        message:"注册成功,请联系管理员审核通过！",
+                        have:0
+                    }    
+                } catch (error) {
+                    ctx.status = 400
+                    ctx.body = {
+                        message: '注册失败'
+                    }
+                }
+            }
+        } catch (error) {
+            ctx.status = 400
+            ctx.body = {
+                message: '注册失败'
+            }
         }
     }
 }

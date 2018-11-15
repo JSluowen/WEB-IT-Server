@@ -11,5 +11,6 @@ router.post("/user/login",userctrl.login)
 router.get('/user/userloading',userctrl.userLoading)
 router.get('/user/userdelete',userctrl.userDelete)
 router.get('/user/userpass',userctrl.userPass)
+router.post('/user/register',userctrl.userRegister)
 
 module.exports = router;
