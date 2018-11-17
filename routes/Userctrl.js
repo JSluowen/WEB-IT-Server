@@ -2,7 +2,7 @@ var query = require("../lib/mysql")
 var comm = require('../lib/comm')
 
 class Userctrl {
-    // 用户登录
+    // 管理员登录
     static async login(ctx) {
         var values = ctx.request.body
         var username = values.username
@@ -10,12 +10,13 @@ class Userctrl {
         var sql = "SELECT *FROM USER WHERE username = ?"
         try {
             var userInfo = await query(sql, [username]);
+            console.log(userInfo)
             // 判断用户是否存在
             if (userInfo[0].length === 0) {
                 ctx.status = 200
                 ctx.body = {
                     have: 0,
-                    active: 0,
+                    status: 0,
                     pas: 0
                 };
             } else {
@@ -25,7 +26,8 @@ class Userctrl {
                     ctx.body = {
                         have: 1,
                         identity: 0,
-                        active: 0
+                        status: 0,
+                        pas: 0
                     }
                 } else {
                     // 密码加密
@@ -37,7 +39,7 @@ class Userctrl {
                         ctx.body = {
                             token: token,
                             have: 1,
-                            active: userInfo[0].is_active,
+                            status: userInfo[0].status,
                             pas: 1,
                             identity: userInfo[0].identity
                         }
@@ -46,7 +48,7 @@ class Userctrl {
                         ctx.body = {
                             have: 1,
                             pas: 0,
-                            active: 1,
+                            status: 1,
                             identity: 1
                         }
                     }
@@ -58,17 +60,66 @@ class Userctrl {
             ctx.status = 200
         }
     }
+    //用户登录
+    static async userLogin(ctx) {
+        var values = ctx.request.body
+        var username = values.username
+        var password = values.password
+        var sql = "SELECT *FROM USER WHERE username = ?"
+        try {
+            var userInfo = await query(sql, [username]);
+            console.log(userInfo)
+            // 判断用户是否存在
+            if (userInfo[0].length === 0) {
+                ctx.status = 200
+                ctx.body = {
+                    have: 0,
+                    status: 0,
+                    pas: 0
+                };
+            } else {
+                // 密码加密
+                password = comm.md5(password)
+                //判断用户密码是否正确
+                if (password == userInfo[0].password) {
+                    ctx.status = 200
+                    var token = comm.token(username)
+                    ctx.body = {
+                        token: token,
+                        have: 1,
+                        status: userInfo[0].status,
+                        pas: 1,
+                        identity: userInfo[0].identity
+                    }
+                } else {
+                    ctx.status = 200
+                    ctx.body = {
+                        have: 1,
+                        pas: 0,
+                        status: 1,
+                        identity: 1
+                    }
+                }
+            }
+        } catch (error) {
+            ctx.status = 400
+        }
+    }
     // 后台用户数据查询加载
     static async userLoading(ctx) {
         var token = ctx.request.header.authorization
         if (token == undefined) {
             ctx.status = 400;
         } else {
-            ctx.status = 200;
-            var sql = 'SELECT *FROM USER'
-            var data = await query(sql)
-            ctx.body = {
-                data: data
+            try {
+                ctx.status = 200;
+                var sql = 'SELECT *FROM USER'
+                var data = await query(sql)
+                ctx.body = {
+                    data: data
+                }
+            } catch (error) {
+                ctx.status=400;
             }
         }
     }
@@ -148,10 +199,10 @@ class Userctrl {
                     var sql2 = "INSERT INTO USER (username,PASSWORD,email ) VALUES(?,?,?)"
                     var pass = comm.md5(values.password)
                     await query(sql2, [values.username, pass, values.email])
-                    ctx.body={
-                        message:"注册成功,请联系管理员审核通过！",
-                        have:0
-                    }    
+                    ctx.body = {
+                        message: "注册成功,请联系管理员审核通过！",
+                        have: 0
+                    }
                 } catch (error) {
                     ctx.status = 400
                     ctx.body = {
