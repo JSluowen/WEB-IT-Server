@@ -68,7 +68,6 @@ class Userctrl {
         var sql = "SELECT *FROM USER WHERE username = ?"
         try {
             var userInfo = await query(sql, [username]);
-            console.log(userInfo)
             // 判断用户是否存在
             if (userInfo[0].length === 0) {
                 ctx.status = 200
@@ -217,5 +216,7 @@ class Userctrl {
             }
         }
     }
+    //完善个人信息
+    
 }
 module.exports = Userctrl
