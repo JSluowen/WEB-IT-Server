@@ -69,7 +69,7 @@ class Userctrl {
         try {
             var userInfo = await query(sql, [username]);
             // 判断用户是否存在
-            if (userInfo[0].length === 0) {
+            if (userInfo.length === 0) {
                 ctx.status = 200
                 ctx.body = {
                     have: 0,
@@ -112,8 +112,8 @@ class Userctrl {
         } else {
             try {
                 ctx.status = 200;
-                var sql = 'SELECT *FROM USER'
-                var data = await query(sql)
+                var sql = 'SELECT *FROM USER'             
+                var data = await query(sql) 
                 ctx.body = {
                     data: data
                 }
@@ -217,6 +217,48 @@ class Userctrl {
         }
     }
     //完善个人信息
+    static async userInfo(ctx){
+        var values = ctx.request.body;
+        var token = ctx.request.header.authorization;
+        if(!token){
+            ctx.status=400;
+        }else{
+           
+            var avatar = values.avatar;
+            var email = values.email;
+            var gender = values.gender;
+            var signature = values.signature;
+            var type = values.type.join("+");
+            var username = values.username;
+            try{
+                ctx.status = 200;
+                var sql3 = "UPDATE USER SET email=? WHERE username=?"
+                await query(sql3,[email,username])
+                var sql1 = "SELECT *FROM user_info WHERE username=?"
+                var res1 = await query(sql1,[username])
+                if(res1.length===0){
+                    var sql2 = "INSERT INTO user_info(gender,signature,avatar,username,TYPE) VALUES(?,?,?,?,?)"; 
+                    await query(sql2,[gender,signature,avatar,username,type]);
+                    ctx.body={
+                        success:1
+                    }
+                }else{
+                    var sql4 = 'UPDATE user_info SET gender=? , signature=?,avatar=? ,TYPE=? WHERE username=?';
+                    await query(sql4,[gender,signature,avatar,type,username])
+                    ctx.body={
+                        success:1
+                    }
+                }
+            }catch(err){
+                console.log(err)
+                ctx.status = 200;
+                ctx.body={
+                    success:0
+                }
+            }
+        }
+    }
+    //前端用户信息查询
     
 }
 module.exports = Userctrl
